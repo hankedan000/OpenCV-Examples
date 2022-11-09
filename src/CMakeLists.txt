@@ -1,2 +1,1 @@
-add_executable(application
-	application.cpp)
+add_subdirectory(DisplayImage)
