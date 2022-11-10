@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <unistd.h>// sleep
 
-const char *PROG_NAME = "application";
+const char *PROG_NAME = "DisplayImage";
 
 struct prog_options
 {
