@@ -72,23 +72,51 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	const auto OUT_VIDEO_SIZE = cv::Size(1280,720);
+	const auto TEXT_FONT = cv::FONT_HERSHEY_DUPLEX;
+	const auto TEXT_COLOR = CV_RGB(118, 185, 0);
 	double frames_count = vcap.get(cv::CAP_PROP_FRAME_COUNT);
 	double fps = vcap.get(cv::CAP_PROP_FPS);
+	double frame_time_sec = 1.0 / fps;
+	int frame_time_ms = std::round(1000.0 / fps);
 	printf("frames_count = %f\n", frames_count);
 	printf("fps = %f\n", fps);
+	printf("frame_time_ms = %d\n", frame_time_ms);
 
 	cv::Mat frame;
-	cv::Mat resize_frame;
-	int frame_time_ms = std::round(1000.0 / fps);
-	printf("frame_time_ms = %d\n", frame_time_ms);
+	cv::Mat out_frame;
+	char frame_idx_str[1024];
+	char frame_time_str[1024];
+	double time_offset_sec = 0.0;
 	for (size_t frame_idx=0; frame_idx<frames_count; frame_idx++)
 	{
 		// Capture frame-by-frame
 		if (vcap.read(frame))
 		{
-			cv::resize(frame,resize_frame,cv::Size(1280,720));
+			cv::resize(frame,out_frame,OUT_VIDEO_SIZE);
+
+			sprintf(frame_idx_str,"frame_idx: %ld",frame_idx);
+			cv::putText(
+				out_frame, //target image
+				frame_idx_str, //text
+				cv::Point(10, 30), //top-left position
+				TEXT_FONT,// font face
+				1.0,// font scale
+				TEXT_COLOR, //font color
+				1);// thickness
+
+			sprintf(frame_time_str,"time_offset: %0.3fs",time_offset_sec);
+			cv::putText(
+				out_frame, //target image
+				frame_time_str, //text
+				cv::Point(10, 30 * 2), //top-left position
+				TEXT_FONT,// font face
+				1.0,// font scale
+				TEXT_COLOR, //font color
+				1);// thickness
+
 			// Display the resulting frame
-			cv::imshow("Video", resize_frame);
+			cv::imshow("Video", out_frame);
 
 			// Press Q on keyboard to exit
 			if (cv::waitKey(frame_time_ms) & 0xFF == 'q')
@@ -96,6 +124,8 @@ int main(int argc, char *argv[])
 				printf("Quit video playback!\n");
 				break;
 			}
+
+			time_offset_sec += frame_time_sec;
 		}
 		else
 		{
